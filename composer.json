@@ -1,6 +1,7 @@
 {
     "name": "warksit/laravel-mail-chimp-sync",
     "description": "Sync Laravel Models with MailChimp as Members or Interests",
+    "license": "MIT",
     "authors": [
         {
             "name": "Andrew Westrope",
