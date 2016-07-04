@@ -1,0 +1,29 @@
+{
+    "name": "warksit/laravel-mail-chimp-sync",
+    "description": "Sync Laravel Models with MailChimp as Members or Interests",
+    "authors": [
+        {
+            "name": "Andrew Westrope",
+            "email": "andrew@warwickshire.it"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Warksit\\LaravelMailChimpSync\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.4",
+        "mockery/mockery": "^0.9.5",
+        "vlucas/phpdotenv": "^2.0",
+        "illuminate/database": "^5.2"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Warksit\\LaravelMailChimpSync\\Tests\\": "tests/"
+        }
+    }
+}

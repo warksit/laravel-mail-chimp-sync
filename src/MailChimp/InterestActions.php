@@ -1,0 +1,78 @@
+<?php namespace Warksit\LaravelMailChimpSync\MailChimp;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Contracts\Config\Repository;
+use Warksit\LaravelMailChimpSync\Models\Interest;
+
+class InterestActions extends MailChimpActions
+{
+    /**
+     * @var Interest
+     */
+    private $interest;
+
+    /**
+     * SubscriptionActions constructor.
+     */
+    public function __construct(Client $guzzle, Repository $config, Interest $interest)
+    {
+        parent::__construct($guzzle, $config);
+        $this->interest = $interest;
+    }
+
+    public function add($model)
+    {
+        if($model->interest)
+        {
+            $response = $this->process(
+                'PATCH',
+                $this->generateUri($model) . "/{$model->interest->interest_id}",
+                [
+                    'json' => [
+                        'name' => $model->getInterestName(),
+                        'display_order' => $model->getInterestDisplayOrder(),
+                    ],
+                ]
+            );
+            $id = json_decode($response->getBody())->id;
+            $interest = $this->interest;
+            $interest->interest_id = $id;
+            $interest->save();
+        } else {
+            $response = $this->process(
+                'POST',
+                $this->generateUri($model),
+                [
+                    'json' => [
+                        'name' => $model->getInterestName(),
+                        'display_order' => $model->getInterestDisplayOrder(),
+                    ],
+                ]
+            );
+            $id = json_decode($response->getBody())->id;
+            $this->interest->interest_id = $id;
+            $model->interest()->save($this->interest);
+        }
+        return $id;
+    }
+
+    public function remove($model)
+    {
+        $this->process(
+            'DELETE',
+            $this->generateUri($model) . "/{$model->interest->interest_id}"
+        );
+        $model->interest->delete();
+    }
+    
+    /**
+     * @param $model
+     * @return string
+     */
+    protected function generateUri($model)
+    {
+        return "/3.0/lists/{$model->getInterestListId()}/interest-categories/{$model->getInterestCategoryId()}/interests";
+    }
+
+}
