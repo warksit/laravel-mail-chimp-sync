@@ -24,7 +24,7 @@ class InterestActionsTest extends TestCase
 
         $response = m::mock(\Psr\Http\Message\ResponseInterface::class);
 
-        $this->setAuth($apiKey = getenv('MAILCHIMP_API'));
+        $apiKey = getenv('MAILCHIMP_API');
        
         $this->guzzle->shouldReceive('request')->with(
             'POST',
@@ -46,7 +46,9 @@ class InterestActionsTest extends TestCase
 
         $interest = m::mock(Interest::class);
         $interest->shouldReceive('setAttribute')->with('interest_id', 1234);
-        (new InterestActions($this->guzzle, $this->config, $interest))->add($this->model);
+        
+        $ia = new InterestActions($this->guzzle, $interest);
+        $ia->add($this->model);
     }
 
     /** @test
@@ -55,7 +57,7 @@ class InterestActionsTest extends TestCase
     {
         $this->model = new DeleteInterestModel();
 
-        $this->setAuth($apiKey = getenv('MAILCHIMP_API'));
+        $apiKey = getenv('MAILCHIMP_API');
 
         $this->guzzle->shouldReceive('request')->with(
             'DELETE',
@@ -68,6 +70,9 @@ class InterestActionsTest extends TestCase
         );
 
         $interest = m::mock(Interest::class);
-        (new InterestActions($this->guzzle, $this->config, $interest))->remove($this->model);
+        
+        $ia = new InterestActions($this->guzzle, $interest);
+        $ia->remove($this->model);
+
     }
 }

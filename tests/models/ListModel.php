@@ -4,9 +4,10 @@ use Mockery as m;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Warksit\LaravelMailChimpSync\Models\MailingList;
-use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpSubscriber;
+use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
+use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
 
-class ListModel extends Model implements CanSyncMailChimpSubscriber
+class ListModel extends Model implements CanSyncMailChimpMember
 {
 
     public function mailingList()
@@ -57,5 +58,10 @@ class ListModel extends Model implements CanSyncMailChimpSubscriber
     public function getMailingListInterests()
     {
         return [];
+    }
+
+    public function getMailChimpAuth()
+    {
+        return new MailChimpAuth(getenv('MAILCHIMP_ENDPOINT'), getenv('MAILCHIMP_API'));
     }
 }
