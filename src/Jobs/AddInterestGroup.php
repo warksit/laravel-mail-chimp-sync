@@ -1,10 +1,11 @@
 <?php namespace Warksit\LaravelMailChimpSync\Jobs;
 
 use App\Jobs\Job;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
 use Warksit\LaravelMailChimpSync\MailChimp\InterestActions;
 
 class AddInterestGroup extends Job implements ShouldQueue
