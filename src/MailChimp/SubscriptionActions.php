@@ -1,14 +1,14 @@
 <?php namespace Warksit\LaravelMailChimpSync\MailChimp;
 
 use Warksit\LaravelMailChimpSync\Objects\MailChimp;
-use Warksit\LaravelMailChimpSync\Interfaces\MailingListModel;
-use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpSubscriber;
+use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
 
 class SubscriptionActions extends MailChimpActions
 {
     public function subscribe($model)
     {
         $this->checkModelImplementsInterface($model);
+        $this->setAuth($model->getMailChimpAuth());
 
         $email = $model->getMailingListEmail();
 
@@ -28,7 +28,9 @@ class SubscriptionActions extends MailChimpActions
     {
         $this->checkModelImplementsInterface($model);
 
-         $this->process(
+        $this->setAuth($model->getMailChimpAuth());
+
+        $this->process(
             'DELETE',
              $this->generateUri($model, $emailToDelete)
         );
@@ -56,8 +58,8 @@ class SubscriptionActions extends MailChimpActions
      */
     private function checkModelImplementsInterface($model)
     {
-        if (!$model instanceof CanSyncMailChimpSubscriber)
-            throw new \InvalidArgumentException('model needs to impliment MailingListModel');
+        if (!$model instanceof CanSyncMailChimpMember)
+            throw new \InvalidArgumentException('model needs to implement ' . CanSyncMailChimpMember::class);
     }
 
     /**

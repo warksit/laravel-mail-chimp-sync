@@ -12,8 +12,7 @@ class MailingListServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            realpath(__DIR__.__DIR__.'/migrations') => $this->app->databasePath().'/migrations',
-            realpath(__DIR__.__DIR__.'/config/maillist.php') => config_path('maillist.php'),
+            realpath(__DIR__.'/../migrations') => $this->app->databasePath().'/migrations',
         ]);
     }
 

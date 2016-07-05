@@ -1,5 +1,6 @@
 <?php namespace Warksit\LaravelMailChimpSync\Interfaces;
 
+use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
 
 interface CanSyncMailChimpMember
 {
@@ -49,4 +50,11 @@ interface CanSyncMailChimpMember
      * @return mixed
      */
     public function getMailingListInterests();
+
+    /**
+     * MailChimp Auth details
+     * return new MailChimpAuth($endpoint, $api_key);
+     * @return MailChimpAuth
+     */
+    public function getMailChimpAuth();
 }

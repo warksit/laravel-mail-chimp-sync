@@ -19,13 +19,18 @@ Add the ServiceProvider  in `config/app.php`:
     ],
 ```
 
-Next run vendor:publish to copy the migrations and publish the config file
+Next run vendor:publish to copy the migrations.
 
 ```bash
 php artisan vendor:publish --provider="Warksit\LaravelMailChimpSync\MailingListServiceProvider"
 ```
 
-and enter your MailChimp api key and endpoint.
+Run the migrations:
+
+```bash
+php artisan migrate
+
+```
 
 ## Usage
 
@@ -36,8 +41,8 @@ This package has 2 main uses. It syncs subscribers to a list(s) and syncs a list
 This allows you to keep changes you make to an Eloquent Model in sync with a MailChimp List. It uses eloquent events. This is achieved through the ```Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncMember``` trait. This requires a few methods on the model which are enforced by implementing the ```Warksit\LaravelMailChimpSync\EloquentTraits\CanSyncMailChimpMember``` interface. Have a look in the doc blocks for more details. If you have overidden the ```boot()``` method make sure you call ```parent::boot()``` no worries if you haven't.
 
 ```php
-    use Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncMember;
     use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
+    use Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncMember;
     
     class YourModel extends Model implements CanSyncMailChimpMember
     {
@@ -56,8 +61,8 @@ This allows you to keep changes you make to an Eloquent Model in sync with a Mai
 This allows you to keep changes you make to an Eloquent Model in Sync as the Interest for an Interest Group. This is achieved through the ```Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncInterest``` trait. This requires a few methods on the model which are enforced by implementing the ```Warksit\LaravelMailChimpSync\EloquentTraits\CanSyncMailChimpInterest``` interface. Have a look in the doc blocks for more details. Again if you have overidden the ```boot()``` method make sure you call ```parent::boot()``` no worries if you haven't.
 ```php
 
-    use Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncInterest;
     use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpInterest;
+    use Warksit\LaravelMailChimpSync\EloquentTraits\MailChimpSyncInterest;
     
     class YourInterestModel extends Model implements CanSyncMailChimpInterest
     {
@@ -77,4 +82,4 @@ If you would like to trigger a sync for a model at another time just call ```$me
 
 ## Contributing
 
-Please! This meets my needs but am open to help. If you find an issue, or have a better way to do something, open an issue or a pull request. There are some test. To get the integration tests to work copy ```.env.example``` to ```.env``` and enter your MailChimp credentials.
+Please! This meets my needs but am open to help. If you find an issue, or have a better way to do something, open an issue or a pull request. There are some tests. To get the integration tests to work copy ```.env.example``` to ```.env``` and enter your MailChimp credentials.

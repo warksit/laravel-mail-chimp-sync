@@ -1,15 +1,12 @@
 <?php namespace Warksit\LaravelMailChimpSync\Jobs;
 
-use App\Company\SetActiveCompany;
 use App\Jobs\Job;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Warksit\LaravelMailChimpSync\Interfaces\MailingListModel;
+use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
 use Warksit\LaravelMailChimpSync\MailChimp\SubscriptionActions;
+use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
 
 class SubscribeToMailingList extends Job implements ShouldQueue
 {
@@ -26,8 +23,8 @@ class SubscribeToMailingList extends Job implements ShouldQueue
      */
     public function __construct($model)
     {
-        if (!$model instanceof MailingListModel)
-            throw new \InvalidArgumentException('Model does not implement MailingListModel');
+        if (!$model instanceof CanSyncMailChimpMember)
+            throw new \InvalidArgumentException('Model does not implement ' . CanSyncMailChimpMember::class);
         
         $this->model = $model;
     }
@@ -39,13 +36,9 @@ class SubscribeToMailingList extends Job implements ShouldQueue
      */
     public function handle(SubscriptionActions $mailChimp)
     {
-        \Log::info('Handling: ' . get_class($this));
-
-        SetActiveCompany::to($this->model->company);
-
         if ($this->model->getMailingListOptedOut())
             return;
-        
+
         $mailChimp->subscribe($this->model);
     }
 }

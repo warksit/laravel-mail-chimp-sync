@@ -3,6 +3,8 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Database\Eloquent\Model;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpAuthNotSet;
 use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
 
 /**
@@ -25,39 +27,28 @@ class MailChimpActions
      * @var array
      */
     protected $auth;
-
     /**
-     * @var array
+     * @var Model
      */
-    private $auth_type = [
-        'basic' => 'maillist.auths.basic.api_key',
-        'oauth' => 'maillist.auths.oauth.access_token',
-    ];
-    /**
-     * @var Repository
-     */
-    private $config;
+    private $model;
 
     /**
      * MailChimpActions constructor.
      * @param Client $guzzle
      */
-    public function __construct(Client $guzzle, Repository $config)
+    public function __construct(Client $guzzle)
     {
         $this->guzzle = $guzzle;
-
-        if ( ! array_key_exists($config->get('maillist.default'),$this->auth_type))
-            throw new \InvalidArgumentException("Mailing List Auth type not set correctly {{$config->get('maillist.default')}}");
-
-        $this->config = $config;
     }
 
     /**
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws MailChimpException
      */
-    public function ping()
+    public function ping(Model $model)
     {
+        $this->setAuth($model->getMailChimpAuth());
+
         return $this->process('GET','/3.0/');
     }
 
@@ -66,14 +57,13 @@ class MailChimpActions
      * @param $uri
      * @param array $data
      * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws MailChimpAuthNotSet
      * @throws MailChimpException
      */
     protected function process($method, $uri, $data = [])
     {
-        // Done here rather than constructor to allow for
-        // config to be set at runtime
-
-        $this->setConfig();
+        if( !$this->auth || !$this->endpoint )
+            throw new MailChimpAuthNotSet();
 
         try {
             return $this->guzzle->request(
@@ -87,15 +77,9 @@ class MailChimpActions
         }
     }
 
-    private function setConfig()
+    protected function setAuth(MailChimpAuth $auth)
     {
-        // This works for basic auth too as MailChimp allow any username
-
-        $this->auth = [
-            'headers' => [
-                'Authorization' => 'OAuth ' . $this->config->get($this->auth_type[$this->config->get('maillist.default')]),
-            ],
-        ];
-        $this->endpoint = $this->config->get('maillist.endpoint');
+        $this->auth = $auth->authHeader();
+        $this->endpoint = $auth->getEndpoint();
     }
 }

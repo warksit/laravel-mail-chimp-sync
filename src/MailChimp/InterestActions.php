@@ -3,6 +3,7 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Contracts\Config\Repository;
+use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpInterest;
 use Warksit\LaravelMailChimpSync\Models\Interest;
 
 class InterestActions extends MailChimpActions
@@ -15,14 +16,17 @@ class InterestActions extends MailChimpActions
     /**
      * SubscriptionActions constructor.
      */
-    public function __construct(Client $guzzle, Repository $config, Interest $interest)
+    public function __construct(Client $guzzle, Interest $interest)
     {
-        parent::__construct($guzzle, $config);
+        parent::__construct($guzzle);
         $this->interest = $interest;
     }
 
     public function add($model)
     {
+        $this->checkModelImplementsInterface($model);
+        $this->setAuth($model->getMailChimpAuth());
+
         if($model->interest)
         {
             $response = $this->process(
@@ -59,6 +63,9 @@ class InterestActions extends MailChimpActions
 
     public function remove($model)
     {
+        $this->checkModelImplementsInterface($model);
+        $this->setAuth($model->getMailChimpAuth());
+
         $this->process(
             'DELETE',
             $this->generateUri($model) . "/{$model->interest->interest_id}"
@@ -73,6 +80,12 @@ class InterestActions extends MailChimpActions
     protected function generateUri($model)
     {
         return "/3.0/lists/{$model->getInterestListId()}/interest-categories/{$model->getInterestCategoryId()}/interests";
+    }
+
+    private function checkModelImplementsInterface($model)
+    {
+        if (!$model instanceof CanSyncMailChimpInterest)
+            throw new \InvalidArgumentException('model needs to implement ' . CanSyncMailChimpInterest::class);
     }
 
 }

@@ -3,6 +3,7 @@
 use App\Jobs\Job;
 use Illuminate\Database\Eloquent\Model;
 use Warksit\LaravelMailChimpSync\MailChimp\SubscriptionActions;
+use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
 
 class UnSubscribeFromMailingList extends Job
 {
@@ -14,6 +15,10 @@ class UnSubscribeFromMailingList extends Job
      * @var
      */
     private $emailToDelete;
+    /**
+     * @var MailChimpAuth
+     */
+    private $auth;
 
     /**
      * Create a new job instance.
@@ -22,6 +27,9 @@ class UnSubscribeFromMailingList extends Job
      */
     public function __construct(Model $model, $emailToDelete)
     {
+        if (!$model instanceof CanSyncMailChimpMember)
+            throw new \InvalidArgumentException('Model does not implement ' . CanSyncMailChimpMember::class);
+
         $this->model = $model;
         $this->emailToDelete = $emailToDelete;
     }
@@ -31,16 +39,13 @@ class UnSubscribeFromMailingList extends Job
      *
      * @return void
      */
-    public function handle(SubscriptionActions $mailchimp)
+    public function handle(SubscriptionActions $mailChimp)
     {
-        \Log::info('Handling: ' . get_class($this));
         if( ! $this->model->mailingList)
             return;
 
         $this->model->mailingList->delete();
-        
-        $mailchimp->unSubscribe($this->model, $this->emailToDelete);
-        
-        \Log::info('UnSubscribe ' . $this->emailToDelete . ' from ' . $this->model->getMailingListId());
+
+        $mailChimp->unSubscribe($this->model, $this->emailToDelete);
     }
 }
