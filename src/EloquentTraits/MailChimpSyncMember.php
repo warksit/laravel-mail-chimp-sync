@@ -11,7 +11,7 @@ trait MailChimpSyncMember
 
     private $mailingListOldEmail = null;
 
-    protected static function bootSyncWithMailingList()
+    protected static function bootMailChimpSyncMember()
     {
         static::saving(function ($model) {
             $model->mailingListPreSave();

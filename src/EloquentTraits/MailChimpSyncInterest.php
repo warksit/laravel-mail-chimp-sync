@@ -2,14 +2,15 @@
 
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Warksit\MailingList\Jobs\AddInterestGroup;
-use Warksit\MailingList\Jobs\DeleteInterestGroup;
+use Warksit\LaravelMailChimpSync\Jobs\AddInterestGroup;
+use Warksit\LaravelMailChimpSync\Jobs\DeleteInterestGroup;
+use Warksit\LaravelMailChimpSync\Models\Interest;
 
 trait MailChimpSyncInterest
 {
     use DispatchesJobs;
 
-    public static function bootMailingListInterest()
+    public static function bootMailChimpSyncInterest()
     {
         static::saved(function ($model) {
             $model->addInterestGroup();
@@ -22,7 +23,7 @@ trait MailChimpSyncInterest
 
     public function interest()
     {
-        return $this->morphOne(\Warksit\MailingList\Models\Interest::class,'interestable');
+        return $this->morphOne(Interest::class,'interestable');
     }
 
     protected function addInterestGroup()
