@@ -65,12 +65,13 @@ class InterestActions extends MailChimpActions
     {
         $this->checkModelImplementsInterface($model);
         $this->setAuth($model->getMailChimpAuth());
-
-        $this->process(
-            'DELETE',
-            $this->generateUri($model) . "/{$model->interest->interest_id}"
-        );
-        $model->interest->delete();
+        if ($model->interest) {
+            $this->process(
+                'DELETE',
+                $this->generateUri($model) . "/{$model->interest->interest_id}"
+            );
+            $model->interest->delete();
+        }
     }
     
     /**
