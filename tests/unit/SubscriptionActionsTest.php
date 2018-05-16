@@ -32,7 +32,7 @@ class SubscriptionActionsTest extends TestCase
                     'Authorization' => 'OAuth ' . $apiKey,
                 ],
                 'json' => array_merge($this->model->getMailingListProfile(),[
-                    'status' => 'subscribed',
+                    'status' => 'pending',
                     'email_address' => $email,
                 ]),
             ]
