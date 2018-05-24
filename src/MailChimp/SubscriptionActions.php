@@ -72,7 +72,7 @@ class SubscriptionActions extends MailChimpActions
     protected function generateBody($model, $interests, $email)
     {
         $data = [
-            'status' => 'pending',
+            'status_if_new' => 'pending',
             'email_address' => $email,
         ];
 
