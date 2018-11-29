@@ -2,13 +2,13 @@
 
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Warksit\LaravelMailChimpSync\Models\Interest;
 use Warksit\LaravelMailChimpSync\Jobs\AddInterestGroup;
 use Warksit\LaravelMailChimpSync\Jobs\DeleteInterestGroup;
-use Warksit\LaravelMailChimpSync\Models\Interest;
 
 trait MailChimpSyncInterest
 {
-    use DispatchesJobs;
+    use DispatchesJobs, CheckIfEnabled;
 
     public static function bootMailChimpSyncInterest()
     {
@@ -28,11 +28,17 @@ trait MailChimpSyncInterest
 
     protected function addInterestGroup()
     {
+        if ($this->mailingListEnabled())
+            return;
+
         $this->dispatch(new AddInterestGroup($this));
     }
 
     protected function removeInterestGroup()
     {
+        if ($this->mailingListEnabled())
+            return;
+
         $this->dispatch(new DeleteInterestGroup($this));
     }
    

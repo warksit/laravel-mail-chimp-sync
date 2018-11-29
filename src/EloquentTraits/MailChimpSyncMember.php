@@ -1,13 +1,13 @@
 <?php namespace Warksit\LaravelMailChimpSync\EloquentTraits;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Warksit\LaravelMailChimpSync\Models\MailingList;
 use Warksit\LaravelMailChimpSync\Jobs\SubscribeToMailingList;
 use Warksit\LaravelMailChimpSync\Jobs\UnSubscribeFromMailingList;
-use Warksit\LaravelMailChimpSync\Models\MailingList;
 
 trait MailChimpSyncMember
 {
-    use DispatchesJobs;
+    use DispatchesJobs, CheckIfEnabled;
 
     private $mailingListOldEmail = null;
 
@@ -26,12 +26,18 @@ trait MailChimpSyncMember
 
     protected function mailingListPreSave()
     {
+        if ($this->mailingListEnabled())
+            return;
+
         if ($this->exists && array_key_exists($this->getMailingListEmailField() , $this->getDirty()))
             $this->mailingListOldEmail = $this->getOriginal($this->getMailingListEmailField());
     }
 
     protected function mailingListPostSave()
     {
+        if ($this->mailingListEnabled())
+            return;
+
         if($this->mailingListOldEmail)
             $this->mailingListUnSubscribe($this->mailingListOldEmail);
 
@@ -40,6 +46,9 @@ trait MailChimpSyncMember
 
     protected function mailingListDeleting()
     {
+        if ($this->mailingListEnabled())
+            return;
+
         $this->mailingListUnSubscribe($this->getMailingListEmail());
     }
 
@@ -57,4 +66,6 @@ trait MailChimpSyncMember
     {
         $this->dispatch(new SubscribeToMailingList($this));
     }
+
+
 }
