@@ -52,7 +52,7 @@ class InterestActionsTest extends TestCase
     }
 
     /** @test
-     * @group wip */
+     * @group  */
     public function it_deletes_interest_group()
     {
         $this->model = new DeleteInterestModel();

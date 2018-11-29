@@ -17,7 +17,7 @@ class SubscriptionActionsTest extends TestCase
     }
     /**
      * @test
-     * @group  */
+     * @group wip */
     public function it_subscribes_to_mailChimp()
     {
         $apiKey = getenv('MAILCHIMP_API');
@@ -32,7 +32,7 @@ class SubscriptionActionsTest extends TestCase
                     'Authorization' => 'OAuth ' . $apiKey,
                 ],
                 'json' => array_merge($this->model->getMailingListProfile(),[
-                    'status' => 'pending',
+                    'status_if_new' => 'pending',
                     'email_address' => $email,
                 ]),
             ]
