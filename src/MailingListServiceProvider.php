@@ -1,6 +1,5 @@
 <?php namespace Warksit\LaravelMailChimpSync;
 
-use HipsterJazzbo\Landlord\Landlord;
 use Illuminate\Support\ServiceProvider;
 
 class MailingListServiceProvider extends ServiceProvider
@@ -25,6 +24,8 @@ class MailingListServiceProvider extends ServiceProvider
      */
     public function register()
     {
-       //
+        $this->app->singleton(MailingList::class, function() {
+            return new MailingList(config('mailinglist.enabled',true));
+        });
     }
 }
