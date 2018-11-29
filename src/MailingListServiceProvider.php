@@ -1,5 +1,6 @@
 <?php namespace Warksit\LaravelMailChimpSync;
 
+use HipsterJazzbo\Landlord\Landlord;
 use Illuminate\Support\ServiceProvider;
 
 class MailingListServiceProvider extends ServiceProvider
@@ -13,6 +14,7 @@ class MailingListServiceProvider extends ServiceProvider
     {
         $this->publishes([
             realpath(__DIR__.'/../migrations') => $this->app->databasePath().'/migrations',
+            __DIR__.'/config/mailinglist.php' => config_path('mailinglist.php')
         ]);
     }
 
@@ -23,6 +25,6 @@ class MailingListServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+       //
     }
 }
