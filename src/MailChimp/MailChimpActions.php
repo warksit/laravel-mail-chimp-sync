@@ -1,11 +1,10 @@
 <?php namespace Warksit\LaravelMailChimpSync\MailChimp;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
-use Warksit\LaravelMailChimpSync\Exceptions\MailChimpAuthNotSet;
+use GuzzleHttp\Exception\RequestException;
 use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpAuthNotSet;
 
 /**
  * Class MailChimpActions
@@ -27,10 +26,6 @@ class MailChimpActions
      * @var array
      */
     protected $auth;
-    /**
-     * @var Model
-     */
-    private $model;
 
     /**
      * MailChimpActions constructor.
@@ -42,8 +37,8 @@ class MailChimpActions
     }
 
     /**
+     * @param Model $model
      * @return mixed|\Psr\Http\Message\ResponseInterface
-     * @throws MailChimpException
      */
     public function ping(Model $model)
     {
@@ -77,6 +72,9 @@ class MailChimpActions
         }
     }
 
+    /**
+     * @param MailChimpAuth $auth
+     */
     protected function setAuth(MailChimpAuth $auth)
     {
         $this->auth = $auth->authHeader();
