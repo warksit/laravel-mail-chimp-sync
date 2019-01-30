@@ -3,6 +3,7 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Contracts\Config\Repository;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
 use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpInterest;
 use Warksit\LaravelMailChimpSync\Models\Interest;
 
@@ -39,10 +40,7 @@ class InterestActions extends MailChimpActions
                     ],
                 ]
             );
-            $id = json_decode($response->getBody())->id;
-            $interest = $this->interest;
-            $interest->interest_id = $id;
-            $interest->save();
+            $model->interest->touch();
         } else {
             $response = $this->process(
                 'POST',
@@ -58,7 +56,6 @@ class InterestActions extends MailChimpActions
             $this->interest->interest_id = $id;
             $model->interest()->save($this->interest);
         }
-        return $id;
     }
 
     public function remove($model)
