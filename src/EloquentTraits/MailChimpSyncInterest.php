@@ -31,6 +31,10 @@ trait MailChimpSyncInterest
         if ($this->mailingListEnabled())
             return;
 
+        if ( ! $this->shouldSync()) {
+            return $this->dispatch(new DeleteInterestGroup($this));
+        }
+
         $this->dispatch(new AddInterestGroup($this));
     }
 
@@ -39,7 +43,11 @@ trait MailChimpSyncInterest
         if ($this->mailingListEnabled())
             return;
 
+        //No shouldSync() check as only deletes if exists
+
         $this->dispatch(new DeleteInterestGroup($this));
     }
-   
+
+    abstract function shouldSync();
+
 }
