@@ -1,14 +1,15 @@
 <?php namespace Warksit\LaravelMailChimpSync\Jobs;
 
-use App\Jobs\Job;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
+use Warksit\LaravelMailChimpSync\Events\AddInterestFailed;
 use Warksit\LaravelMailChimpSync\MailChimp\InterestActions;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpTooManyInterestsException;
 
-class AddInterestGroup extends Job implements ShouldQueue
+class AddInterestGroup implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
@@ -34,6 +35,10 @@ class AddInterestGroup extends Job implements ShouldQueue
      */
     public function handle(InterestActions $mailChimp)
     {
-        $mailChimp->add($this->model);
+        try {
+            $mailChimp->add($this->model);
+        } catch (MailChimpTooManyInterestsException $e) {
+            event(new AddInterestFailed($this->model));
+        }
     }
 }
