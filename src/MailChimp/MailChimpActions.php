@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Exception\RequestException;
 use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
 use Warksit\LaravelMailChimpSync\Exceptions\MailChimpAuthNotSet;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpTooManyInterestsException;
 
 /**
  * Class MailChimpActions
@@ -67,8 +68,14 @@ class MailChimpActions
                 array_merge($this->auth,$data)
             );
         } catch (RequestException $e) {
-            $message = ($e->hasResponse()) ?  ' due to ' . \GuzzleHttp\Psr7\str($e->getResponse()) : '[No MailChimp Message]';
-            throw new MailChimpException('Error: '. $method . 'ing to ' . $this->endpoint . $uri . ' due to ' . $message);
+            $message = ($e->hasResponse()) ?  'due to ' . \GuzzleHttp\Psr7\str($e->getResponse()) : '[No MailChimp Message]';
+            $response = \GuzzleHttp\Psr7\str($e->getResponse());
+
+            if (strpos($response, "Cannot have more than 60 interests per list (across all categories)."))
+            {
+                throw new MailChimpTooManyInterestsException();
+            }
+            throw new MailChimpException('Error: '. $method . 'ing to ' . $this->endpoint . $uri . ' ' . $message);
         }
     }
 
