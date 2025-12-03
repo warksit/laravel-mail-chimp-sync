@@ -68,8 +68,8 @@ class MailChimpActions
                 array_merge($this->auth,$data)
             );
         } catch (RequestException $e) {
-            $message = ($e->hasResponse()) ?  'due to ' . \GuzzleHttp\Psr7\str($e->getResponse()) : '[No MailChimp Message]';
-            $response = \GuzzleHttp\Psr7\str($e->getResponse());
+            $response = $e->hasResponse() ? (string) $e->getResponse()->getBody() : '';
+            $message = $e->hasResponse() ? 'due to ' . $response : '[No MailChimp Message]';
 
             if (strpos($response, "Cannot have more than 60 interests per list (across all categories)."))
             {

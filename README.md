@@ -2,7 +2,7 @@
 
 [ ![Codeship Status for warksit/laravel-mail-chimp-sync](https://codeship.com/projects/6fe7b900-27fe-0134-8662-5600f55ce6ca/status?branch=master)](https://codeship.com/projects/162370)
 
-A package to sync subscribers and interests (using eloquent events) with MailChimp (API v3) for Laravel 5.2+. It's only dependency is Guzzle 6.
+A package to sync subscribers and interests (using eloquent events) with MailChimp (API v3) for Laravel 5.2+. It's only dependency is Guzzle 6 or 7.
 
 ## Installation
 
