@@ -42,20 +42,53 @@ class InterestActions extends MailChimpActions
             );
             $model->interest->touch();
         } else {
-            $response = $this->process(
-                'POST',
-                $this->generateUri($model),
-                [
-                    'json' => [
-                        'name' => $model->getInterestName(),
-                        'display_order' => $model->getInterestDisplayOrder(),
-                    ],
-                ]
-            );
-            $id = json_decode($response->getBody())->id;
+            try {
+                $response = $this->process(
+                    'POST',
+                    $this->generateUri($model),
+                    [
+                        'json' => [
+                            'name' => $model->getInterestName(),
+                            'display_order' => $model->getInterestDisplayOrder(),
+                        ],
+                    ]
+                );
+                $id = json_decode($response->getBody())->id;
+            } catch (MailChimpException $e) {
+                $id = $this->unclaimedInterestNamed($model, $e);
+            }
             $this->interest->interest_id = $id;
             $model->interest()->save($this->interest);
         }
+    }
+
+    /**
+     * MailChimp refuses a second interest with the same name, so a model whose
+     * interest row has gone missing can never be synced again by POSTing. Adopt
+     * the existing interest instead - but only if no other model holds it, or
+     * deleting either model would delete the interest from under the other.
+     *
+     * @param $model
+     * @param MailChimpException $e
+     * @return string
+     * @throws MailChimpException
+     */
+    private function unclaimedInterestNamed($model, MailChimpException $e)
+    {
+        if (strpos($e->getMessage(), 'already exists on the list') === false) {
+            throw $e;
+        }
+
+        $response = $this->process('GET', $this->generateUri($model) . '?count=1000');
+
+        foreach (json_decode($response->getBody())->interests as $interest) {
+            if (strcasecmp(trim($interest->name), trim($model->getInterestName())) === 0
+                && ! Interest::where('interest_id', $interest->id)->exists()) {
+                return $interest->id;
+            }
+        }
+
+        throw $e;
     }
 
     public function remove($model)
