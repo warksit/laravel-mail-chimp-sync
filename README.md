@@ -84,4 +84,11 @@ If you would like to trigger a sync for a model at another time just call ```$me
 
 ## Contributing
 
-Please! This meets my needs but am open to help. If you find an issue, or have a better way to do something, open an issue or a pull request. There are some tests. To get the integration tests to work copy ```.env.example``` to ```.env``` and enter your MailChimp credentials.
+Please! This meets my needs but am open to help. If you find an issue, or have a better way to do something, open an issue or a pull request.
+
+```bash
+composer install
+composer test
+```
+
+The unit suite runs against a mocked HTTP client and an in-memory SQLite database. The integration suite talks to the real MailChimp API: copy ```.env.example``` to ```.env```, fill in a test list's details, and run ```vendor/bin/phpunit --testsuite integration```. Without them it is skipped.

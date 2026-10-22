@@ -2,8 +2,9 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
-class CreateMailinglistTable extends Migration
+class CreateInterestTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,10 +13,10 @@ class CreateMailinglistTable extends Migration
      */
     public function up()
     {
-        Schema::create('mailing_lists', function (Blueprint $table) {
+        Schema::create('interests', function (Blueprint $table) {
             $table->increments('id');
-            $table->morphs('mailable');
-            $table->json('data');
+            $table->morphs('interestable');
+            $table->string('interest_id', 10);
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ class CreateMailinglistTable extends Migration
      */
     public function down()
     {
-        Schema::drop('mailing_lists');
+        Schema::drop('interests');
     }
 }

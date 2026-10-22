@@ -1,37 +1,102 @@
-<?php namespace Warksit\LaravelMailChimpSync\Tests;
+<?php
 
-use Dotenv\Dotenv;
+namespace Warksit\LaravelMailChimpSync\Tests;
+
 use GuzzleHttp\Client;
-use Illuminate\Contracts\Config\Repository;
-use Mockery as m;
-use Warksit\LaravelMailChimpSync\MailChimp\MailChimpAuth;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Orchestra\Testbench\TestCase as Orchestra;
+use Psr\Http\Message\RequestInterface;
+use Warksit\LaravelMailChimpSync\MailingList;
+use Warksit\LaravelMailChimpSync\MailingListServiceProvider;
+use Warksit\LaravelMailChimpSync\Tests\Fixtures\MailChimpAccount;
 
-class TestCase extends \PHPUnit_Framework_TestCase
+abstract class TestCase extends Orchestra
 {
-    protected $config;
-    protected $endpoint;
-    protected $guzzle;
+    use RefreshDatabase;
 
-    public function setUp()
+    /**
+     * Every request the mocked client has sent, oldest first.
+     *
+     * @var array
+     */
+    protected $requests = [];
+
+    protected function getPackageProviders($app)
     {
-
-        $dotenv = new Dotenv(__DIR__.'/../');
-        $dotenv->load();
-        $this->guzzle = m::mock(Client::class);
-        $this->endpoint = getenv('MAILCHIMP_ENDPOINT');
+        return [MailingListServiceProvider::class];
     }
 
-    public function tearDown()
+    protected function defineDatabaseMigrations()
     {
-        m::close();
+        $this->loadMigrationsFrom(__DIR__.'/../migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Fixtures/migrations');
+    }
+
+    protected function tearDown(): void
+    {
+        MailChimpAccount::reset();
+
+        parent::tearDown();
     }
 
     /**
-     * @param $apiKey
-     * @return MailChimpAuth
+     * Answer the next requests to MailChimp with these responses, in order, and bind
+     * the client into the container so the jobs resolve it too. A 4xx response
+     * throws as it would from the real API.
      */
-    protected function setAuth($apiKey)
+    protected function mailChimpReplies(Response ...$responses)
     {
-        return new MailChimpAuth($this->endpoint, $apiKey);
+        $stack = HandlerStack::create(new MockHandler($responses));
+        $stack->push(Middleware::history($this->requests));
+
+        $client = new Client(['handler' => $stack]);
+        $this->app->instance(Client::class, $client);
+
+        return $client;
+    }
+
+    protected function reply($body, $status = 200)
+    {
+        return new Response($status, ['Content-Type' => 'application/json'], json_encode($body));
+    }
+
+    /**
+     * @return RequestInterface
+     */
+    protected function sent($index)
+    {
+        return $this->requests[$index]['request'];
+    }
+
+    protected function sentJson($index)
+    {
+        return json_decode((string) $this->sent($index)->getBody(), true);
+    }
+
+    protected function uri($path)
+    {
+        return MailChimpAccount::$endpoint.$path;
+    }
+
+    /**
+     * Create fixtures without the sync traits dispatching anything for them.
+     *
+     * Model::withoutEvents() is no good for this: a model booted inside it registers
+     * its trait listeners on no dispatcher at all, and they never fire again.
+     */
+    protected function withoutSyncing(callable $callback)
+    {
+        $mailingList = $this->app->make(MailingList::class);
+        $mailingList->disable();
+
+        try {
+            return $callback();
+        } finally {
+            $mailingList->enable();
+        }
     }
 }

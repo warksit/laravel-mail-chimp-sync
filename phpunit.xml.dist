@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit backupGlobals="false"
-         backupStaticAttributes="false"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false">
+         defaultTestSuite="unit"
+         failOnRisky="true"
+         failOnWarning="true">
     <testsuites>
         <testsuite name="unit">
-            <directory suffix="Test.php">./tests/unit</directory>
+            <directory>tests/Unit</directory>
         </testsuite>
+        <!-- Talks to the real MailChimp API: copy .env.example to .env and fill it in,
+             then run the "integration" test suite. Skipped without it. -->
         <testsuite name="integration">
-            <directory suffix="Test.php">./tests/integration</directory>
+            <directory>tests/Integration</directory>
         </testsuite>
     </testsuites>
-    <groups>
+    <source>
         <include>
-            <!--<group>wip</group>-->
+            <directory>src</directory>
         </include>
-    </groups>
-
+    </source>
 </phpunit>
