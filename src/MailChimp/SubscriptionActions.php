@@ -1,5 +1,6 @@
 <?php namespace Warksit\LaravelMailChimpSync\MailChimp;
 
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
 use Warksit\LaravelMailChimpSync\Objects\MailChimp;
 use Warksit\LaravelMailChimpSync\Interfaces\CanSyncMailChimpMember;
 
@@ -24,16 +25,33 @@ class SubscriptionActions extends MailChimpActions
         return $subscriberDetails;
     }
 
+    /**
+     * MailChimp answers 405 for a member who is bounced, pending or already archived, and
+     * status_if_new=pending makes anyone who never confirmed one of those. There is nothing
+     * left to remove, so it is not a failure: this job is not queued, so throwing here fails
+     * the save that triggered it, after the model is written and before the subscribe for
+     * the new address.
+     *
+     * @return bool false when MailChimp would not remove the member
+     */
     public function unSubscribe($model, $emailToDelete)
     {
         $this->checkModelImplementsInterface($model);
 
         $this->setAuth($model->getMailChimpAuth());
 
-        $this->process(
-            'DELETE',
-             $this->generateUri($model, $emailToDelete)
-        );
+        try {
+            $this->process(
+                'DELETE',
+                 $this->generateUri($model, $emailToDelete)
+            );
+        } catch (MailChimpException $e) {
+            if (strpos($e->getMessage(), '"status":405') === false) {
+                throw $e;
+            }
+
+            return false;
+        }
 
         return true;
     }

@@ -4,6 +4,7 @@ namespace Warksit\LaravelMailChimpSync\Tests\Unit;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Warksit\LaravelMailChimpSync\Exceptions\MailChimpException;
 use Warksit\LaravelMailChimpSync\MailChimp\SubscriptionActions;
 use Warksit\LaravelMailChimpSync\Models\MailingList;
 use Warksit\LaravelMailChimpSync\Tests\Fixtures\Member;
@@ -96,6 +97,29 @@ class SubscriptionActionsTest extends TestCase
 
         $this->assertSame('DELETE', $this->sent(0)->getMethod());
         $this->assertSame($this->memberUri('old@example.com'), (string) $this->sent(0)->getUri());
+    }
+
+    public function test_a_member_mailchimp_will_not_remove_is_not_a_failure()
+    {
+        $this->mailChimpReplies(new Response(405, [], json_encode([
+            'title' => 'Method Not Allowed',
+            'status' => 405,
+            'detail' => 'This list member cannot be removed. Can not archive a contact that is bounced, pending or archived',
+        ])));
+
+        $this->assertFalse($this->actions()->unSubscribe($this->member, 'old@example.com'));
+    }
+
+    public function test_any_other_refusal_to_delete_still_throws()
+    {
+        $this->mailChimpReplies(new Response(401, [], json_encode([
+            'title' => 'API Key Invalid',
+            'status' => 401,
+        ])));
+
+        $this->expectException(MailChimpException::class);
+
+        $this->actions()->unSubscribe($this->member, 'old@example.com');
     }
 
     public function test_it_only_accepts_member_models()
